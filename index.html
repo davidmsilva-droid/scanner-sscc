@@ -1,8 +1,6 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
-
+<html lang="pt">
 <head>
-
   <meta charset="UTF-8">
 
   <meta
@@ -12,35 +10,18 @@
 
   <meta
     name="theme-color"
-    content="#17324d"
+    content="#071426"
   >
 
-  <title>
-    Scanner SSCC
-  </title>
+  <title>Leitor SSCC</title>
 
+  <script src="https://unpkg.com/@zxing/browser@latest"></script>
 
   <style>
-
-    :root{
-      --navy:#17324d;
-      --navy2:#234b69;
-      --bg:#0b121b;
-      --panel:#142231;
-      --panel2:#0f1a26;
-      --line:#2b4052;
-      --text:#f4f7fa;
-      --muted:#9eb0bf;
-      --accent:#78b2d6;
-      --ok:#35b779;
-      --danger:#e06b75;
-    }
-
-
     *{
       box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
     }
-
 
     html,
     body{
@@ -48,1473 +29,1301 @@
       padding:0;
       width:100%;
       min-height:100%;
-      background:var(--bg);
-      color:var(--text);
-      font-family:
-        Inter,
-        Arial,
-        sans-serif;
+      background:#071426;
+      color:#ffffff;
+      font-family:Arial,Helvetica,sans-serif;
     }
-
 
     body{
-
       min-height:100vh;
-
       display:flex;
-
-      flex-direction:column;
-
-      background:
-        radial-gradient(
-          circle at top,
-          #1a3044 0,
-          #0b121b 52%
-        );
-
+      justify-content:center;
+      align-items:flex-start;
     }
 
+    .app{
+      width:100%;
+      max-width:700px;
+      padding:18px;
+    }
 
-    header{
-
-      background:
-        linear-gradient(
-          135deg,
-          var(--navy),
-          var(--navy2)
-        );
-
-      padding:
-        20px
-        16px;
-
+    .header{
       text-align:center;
-
-      font-weight:800;
-
-      font-size:
-        clamp(
-          20px,
-          5vw,
-          28px
-        );
-
-      letter-spacing:.3px;
-
-      box-shadow:
-        0 5px 22px #0005;
-
+      margin-bottom:18px;
     }
 
-
-    .sub{
-
-      font-size:12px;
-
-      font-weight:500;
-
-      color:#c9d9e5;
-
-      margin-top:7px;
-
-      letter-spacing:1px;
-
-      text-transform:uppercase;
-
+    .header h1{
+      margin:0;
+      font-size:22px;
+      line-height:1.25;
+      font-weight:700;
     }
 
-
-    main{
-
-      width:
-        min(
-          760px,
-          94%
-        );
-
-      margin:
-        20px auto;
-
-      flex:1;
-
-      display:flex;
-
-      flex-direction:column;
-
+    .header p{
+      margin:7px 0 0;
+      color:#aebdce;
+      font-size:14px;
     }
-
 
     .card{
-
-      background:
-        linear-gradient(
-          145deg,
-          #182a3a,
-          #12202d
-        );
-
-      border:
-        1px solid
-        var(--line);
-
+      background:#0d1d31;
+      border:1px solid #21364f;
       border-radius:18px;
-
-      padding:20px;
-
-      box-shadow:
-        0 12px 32px #0004;
-
+      padding:16px;
+      margin-bottom:15px;
+      box-shadow:0 8px 25px rgba(0,0,0,.18);
     }
 
-
-    .label{
-
-      font-size:11px;
-
-      color:var(--muted);
-
-      margin-bottom:10px;
-
-      text-transform:uppercase;
-
-      font-weight:800;
-
-      letter-spacing:1.3px;
-
+    .card h2{
+      margin:0 0 12px;
+      font-size:17px;
     }
 
-
-    .camera-wrap{
-
+    .camera-area{
       position:relative;
-
       width:100%;
-
-      overflow:hidden;
-
+      background:#000;
       border-radius:14px;
-
-      background:#050b11;
-
-      border:
-        1px solid
-        #2a4051;
-
+      overflow:hidden;
+      aspect-ratio:16/10;
     }
-
 
     #video{
-
       width:100%;
-
+      height:100%;
       display:block;
-
-      min-height:280px;
-
-      max-height:620px;
-
       object-fit:cover;
-
-      background:#050b11;
-
+      background:#000;
     }
 
-
-    .scanner-frame{
-
+    .scan-frame{
       position:absolute;
-
-      left:7%;
-
-      right:7%;
-
-      top:35%;
-
-      height:30%;
-
-      border:
-        3px solid
-        var(--accent);
-
-      border-radius:12px;
-
-      box-shadow:
-
-        0 0 0 9999px
-        rgba(0,0,0,.22),
-
-        0 0 25px
-        rgba(120,178,214,.35);
-
-      pointer-events:none;
-
-    }
-
-
-    .scanner-line{
-
-      position:absolute;
-
       left:8%;
-
       right:8%;
-
-      top:49%;
-
-      height:2px;
-
-      background:var(--accent);
-
+      top:31%;
+      height:38%;
+      border:3px solid #00ff88;
+      border-radius:12px;
       box-shadow:
-        0 0 10px
-        rgba(120,178,214,.9);
-
-      opacity:.9;
-
+        0 0 0 9999px rgba(0,0,0,.18),
+        0 0 18px rgba(0,255,136,.45);
       pointer-events:none;
-
     }
 
+    .scan-line{
+      position:absolute;
+      left:8%;
+      right:8%;
+      top:50%;
+      height:2px;
+      background:#00ff88;
+      box-shadow:0 0 10px #00ff88;
+      pointer-events:none;
+      animation:scanline 1.8s linear infinite;
+    }
+
+    @keyframes scanline{
+      0%{
+        transform:translateY(-55px);
+      }
+      50%{
+        transform:translateY(55px);
+      }
+      100%{
+        transform:translateY(-55px);
+      }
+    }
 
     .status{
-
       margin-top:12px;
-
-      padding:
-        12px
-        14px;
-
+      padding:11px 12px;
       border-radius:10px;
-
-      background:#0b1621;
-
-      border:
-        1px solid
-        #2a3e50;
-
-      color:#b9cad7;
-
-      font-size:13px;
-
-      text-align:center;
-
+      background:#13283f;
+      color:#d9e6f3;
+      font-size:14px;
       line-height:1.4;
-
+      text-align:center;
     }
-
 
     .status.ok{
-
-      color:#bff0d8;
-
-      background:
-        linear-gradient(
-          135deg,
-          #173c32,
-          #1b302b
-        );
-
-      border-color:#2d765d;
-
+      background:#103925;
+      color:#9ff0bd;
     }
-
 
     .status.error{
-
-      color:#ffc5cb;
-
-      background:
-        linear-gradient(
-          135deg,
-          #43252c,
-          #301d25
-        );
-
-      border-color:#8c4652;
-
+      background:#451c24;
+      color:#ffb8c1;
     }
 
+    .status.warning{
+      background:#493a13;
+      color:#ffe69b;
+    }
 
     .buttons{
-
       display:flex;
-
-      gap:12px;
-
-      margin-top:14px;
-
+      gap:10px;
+      margin-top:12px;
     }
-
 
     button{
-
       flex:1;
-
+      min-height:50px;
       border:0;
-
-      border-radius:10px;
-
-      padding:
-        14px
-        18px;
-
-      font-size:15px;
-
-      font-weight:800;
-
+      border-radius:12px;
+      padding:12px 14px;
+      font-size:16px;
+      font-weight:700;
       cursor:pointer;
-
-      transition:
-        transform .15s,
-        filter .15s;
-
     }
-
-
-    button:hover{
-
-      filter:brightness(1.1);
-
-      transform:
-        translateY(-1px);
-
-    }
-
 
     button:disabled{
-
       opacity:.5;
-
       cursor:not-allowed;
-
-      transform:none;
-
     }
 
-
-    .primary{
-
-      background:var(--accent);
-
-      color:#071019;
-
+    #btnStart{
+      background:#00c878;
+      color:#001b10;
     }
 
-
-    .secondary{
-
-      background:#354b5d;
-
-      color:white;
-
+    #btnStop{
+      background:#33465d;
+      color:#fff;
     }
 
+    .field{
+      margin-top:10px;
+    }
 
-    .resultado{
+    input{
+      width:100%;
+      min-height:50px;
+      border:1px solid #334b66;
+      border-radius:11px;
+      background:#071426;
+      color:#fff;
+      padding:12px 14px;
+      font-size:17px;
+      outline:none;
+    }
 
+    input:focus{
+      border-color:#00c878;
+    }
+
+    .btn-processar{
+      width:100%;
+      margin-top:10px;
+      background:#198cff;
+      color:#fff;
+    }
+
+    .result{
       display:none;
-
-      margin-top:18px;
-
-      padding:16px;
-
-      border-radius:12px;
-
-      background:#0b1621;
-
-      border:
-        1px solid
-        #2a3e50;
-
-      text-align:center;
-
     }
 
-
-    .resultado-title{
-
-      font-size:12px;
-
-      color:var(--muted);
-
-      text-transform:uppercase;
-
-      letter-spacing:1px;
-
-      font-weight:800;
-
-      margin-bottom:8px;
-
-    }
-
-
-    .resultado-code{
-
-      font-size:
-        clamp(
-          18px,
-          4vw,
-          25px
-        );
-
-      font-weight:900;
-
-      word-break:
-        break-all;
-
-      color:#f4f7fa;
-
-    }
-
-
-    .info{
-
-      margin-top:14px;
-
-      padding:
-        12px
-        14px;
-
+    .result-code{
+      word-break:break-all;
+      background:#071426;
+      border:1px solid #29425f;
       border-radius:10px;
+      padding:13px;
+      font-size:17px;
+      font-weight:700;
+      text-align:center;
+      letter-spacing:.5px;
+    }
 
-      background:#0d1924;
-
-      border:
-        1px solid
-        #263b4c;
-
-      color:#9eb0bf;
-
+    .debug{
+      margin-top:10px;
       font-size:12px;
-
-      line-height:1.5;
-
+      color:#8fa5bc;
       text-align:center;
-
+      word-break:break-word;
     }
 
-
-    footer{
-
-      padding:15px;
-
+    .footer{
       text-align:center;
-
-      color:#8298aa;
-
-      font-size:11px;
-
-      border-top:
-        1px solid
-        #223746;
-
-      background:#09131d;
-
+      color:#71869d;
+      font-size:12px;
+      padding:8px 0 20px;
     }
 
-
-    @media(max-width:600px){
-
-      main{
-
-        width:94%;
-
-        margin:
-          14px auto;
-
+    @media(max-width:480px){
+      .app{
+        padding:12px;
       }
 
-
-      .card{
-
-        padding:15px;
-
-        border-radius:14px;
-
+      .header h1{
+        font-size:20px;
       }
 
-
-      #video{
-
-        min-height:300px;
-
-        max-height:70vh;
-
+      .camera-area{
+        aspect-ratio:4/3;
       }
-
-
-      .buttons{
-
-        flex-direction:column;
-
-      }
-
-
-      button{
-
-        width:100%;
-
-      }
-
     }
-
   </style>
-
-
-  <!--
-    ZXing Browser
-
-    Responsável pela leitura de
-    Code 128 / GS1-128.
-  -->
-
-  <script
-    src="https://unpkg.com/@zxing/browser@latest">
-  </script>
-
 </head>
-
 
 <body>
 
+<div class="app">
 
-<header>
-
-  Scanner SSCC
-
-  <div class="sub">
-    Leitura Code 128 / GS1-128
+  <div class="header">
+    <h1>SSCC - CONTROLO DE RECEÇÃO CFL . SFW</h1>
+    <p>Leitor de SSCC · Code 128 / GS1-128</p>
   </div>
 
-</header>
 
+  <!-- CÂMARA -->
+  <div class="card">
 
-<main>
+    <h2>Leitura por câmara</h2>
 
-
-  <section class="card">
-
-    <div class="label">
-      Câmara
-    </div>
-
-
-    <div class="camera-wrap">
+    <div class="camera-area">
 
       <video
         id="video"
         autoplay
         muted
         playsinline
-        webkit-playsinline>
-      </video>
+        webkit-playsinline
+      ></video>
 
-
-      <div class="scanner-frame"></div>
-
-      <div class="scanner-line"></div>
+      <div class="scan-frame"></div>
+      <div class="scan-line"></div>
 
     </div>
-
 
     <div
-      id="status"
-      class="status">
-
-      Prima
-      <strong>
-        Iniciar câmara
-      </strong>
-      para começar.
-
+      id="cameraStatus"
+      class="status"
+    >
+      Prima "Iniciar câmara" e aponte para o código de barras.
     </div>
-
 
     <div class="buttons">
 
       <button
         id="btnStart"
-        class="primary">
-
-        Iniciar câmara
-
+        onclick="iniciarCamera()"
+      >
+        📷 Iniciar câmara
       </button>
-
 
       <button
         id="btnStop"
-        class="secondary"
-        disabled>
-
-        Parar
-
+        onclick="pararCamera()"
+        disabled
+      >
+        ⏹ Parar
       </button>
 
     </div>
 
+    <div
+      id="debug"
+      class="debug"
+    ></div>
+
+  </div>
+
+
+  <!-- SSCC MANUAL -->
+  <div class="card">
+
+    <h2>Introdução manual de SSCC</h2>
+
+    <div class="field">
+
+      <input
+        id="scanner"
+        type="text"
+        inputmode="numeric"
+        autocomplete="off"
+        placeholder="Introduza o SSCC"
+      >
+
+    </div>
+
+    <button
+      class="btn-processar"
+      onclick="processarManual()"
+    >
+      Processar SSCC
+    </button>
+
+  </div>
+
+
+  <!-- RESULTADO -->
+  <div
+    id="resultado"
+    class="card result"
+  >
+
+    <h2>SSCC lido</h2>
 
     <div
-      id="resultado"
-      class="resultado">
+      id="resultadoCode"
+      class="result-code"
+    ></div>
 
-      <div class="resultado-title">
-        SSCC encontrado
-      </div>
-
-      <div
-        id="resultadoCode"
-        class="resultado-code">
-      </div>
-
-    </div>
+  </div>
 
 
-    <div class="info">
+  <div class="footer">
+    Controlo de receção CFL . SFW
+  </div>
 
-      Aponte a câmara para o código de barras
-      <strong>Code 128 / GS1-128</strong>.
-      O código será enviado automaticamente
-      para a aplicação de receção.
-
-    </div>
-
-  </section>
-
-
-</main>
-
-
-<footer>
-
-  SSCC - CONTROLO DE RECEÇÃO CFL . SFW
-
-</footer>
+</div>
 
 
 <script>
 
+  let scannerAtivo = false;
+  let codigoEncontrado = false;
 
-/* =====================================================
- * ELEMENTOS
- * ===================================================== */
+  let codeReader = null;
+  let cameraStream = null;
 
-const video =
-  document.getElementById(
-    'video'
-  );
+  const video =
+    document.getElementById('video');
 
+  const cameraStatus =
+    document.getElementById('cameraStatus');
 
-const status =
-  document.getElementById(
-    'status'
-  );
+  const btnStart =
+    document.getElementById('btnStart');
 
+  const btnStop =
+    document.getElementById('btnStop');
 
-const btnStart =
-  document.getElementById(
-    'btnStart'
-  );
+  const scanner =
+    document.getElementById('scanner');
 
+  const resultado =
+    document.getElementById('resultado');
 
-const btnStop =
-  document.getElementById(
-    'btnStop'
-  );
+  const resultadoCode =
+    document.getElementById('resultadoCode');
 
-
-const resultado =
-  document.getElementById(
-    'resultado'
-  );
+  const debug =
+    document.getElementById('debug');
 
 
-const resultadoCode =
-  document.getElementById(
-    'resultadoCode'
-  );
+  /*
+   * ----------------------------------------------------
+   * INICIAR CÂMARA
+   * ----------------------------------------------------
+   */
 
+  async function iniciarCamera(){
 
-/* =====================================================
- * ESTADO
- * ===================================================== */
-
-let stream =
-  null;
-
-let codeReader =
-  null;
-
-let scannerAtivo =
-  false;
-
-let codigoEncontrado =
-  false;
-
-
-/* =====================================================
- * URL DE RETORNO
- *
- * O Scanner_Telemovel.html abre esta página com:
- *
- * ?return=https%3A%2F%2F...
- *
- * ===================================================== */
-
-function obterReturnUrl(){
-
-  try{
-
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
-
-
-    return params.get(
-      'return'
-    ) || '';
-
-  }catch(e){
-
-    console.error(e);
-
-    return '';
-
-  }
-
-}
-
-
-/* =====================================================
- * INICIAR CÂMARA
- * ===================================================== */
-
-async function iniciarCamera(){
-
-  if(scannerAtivo){
-
-    return;
-
-  }
-
-
-  try{
-
-    codigoEncontrado =
-      false;
-
-
-    btnStart.disabled =
-      true;
-
-    btnStop.disabled =
-      false;
-
-
-    resultado.style.display =
-      'none';
-
-
-    resultadoCode.textContent =
-      '';
-
-
-    status.className =
-      'status';
-
-
-    status.innerHTML =
-      'A pedir acesso à câmara...';
-
-
-    /* -----------------------------------------------
-     * VERIFICAR SUPORTE
-     * ----------------------------------------------- */
-
-    if(!window.isSecureContext){
-
-      throw new Error(
-        'Esta página não está a ser executada em HTTPS.'
-      );
-
+    if(scannerAtivo){
+      return;
     }
-
-
-    if(
-      !navigator.mediaDevices ||
-      !navigator.mediaDevices.getUserMedia
-    ){
-
-      throw new Error(
-        'Este navegador não disponibiliza acesso à câmara.'
-      );
-
-    }
-
-
-    if(
-      !window.ZXingBrowser ||
-      !window.ZXingBrowser.BrowserMultiFormatReader
-    ){
-
-      throw new Error(
-        'O leitor de códigos não foi carregado. Verifique a ligação à Internet e tente novamente.'
-      );
-
-    }
-
-
-    /* -----------------------------------------------
-     * PEDIR CÂMARA TRASEIRA
-     * ----------------------------------------------- */
-
-    status.innerHTML =
-      'A abrir a câmara traseira...';
-
-
-    stream =
-      await navigator.mediaDevices.getUserMedia({
-
-        video:{
-
-          facingMode:{
-            ideal:'environment'
-          },
-
-          width:{
-            ideal:1920
-          },
-
-          height:{
-            ideal:1080
-          },
-
-          frameRate:{
-            ideal:30
-          }
-
-        },
-
-        audio:false
-
-      });
-
-
-    if(!stream){
-
-      throw new Error(
-        'Não foi possível obter a câmara.'
-      );
-
-    }
-
-
-    /* -----------------------------------------------
-     * LIGAR STREAM AO VÍDEO
-     * ----------------------------------------------- */
-
-    video.srcObject =
-      stream;
-
-    video.muted =
-      true;
-
-    video.setAttribute(
-      'playsinline',
-      ''
-    );
-
-    video.setAttribute(
-      'webkit-playsinline',
-      ''
-    );
-
 
     try{
 
-      await video.play();
+      codigoEncontrado = false;
 
-    }catch(e){
+      btnStart.disabled = true;
+      btnStop.disabled = false;
 
-      console.warn(
-        'video.play():',
-        e
-      );
+      cameraStatus.className =
+        'status';
 
-    }
+      cameraStatus.textContent =
+        'A preparar a câmara...';
 
+      debug.textContent =
+        'A procurar Code 128 / GS1-128...';
 
-    scannerAtivo =
-      true;
 
+      if(
+        !navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia
+      ){
 
-    status.innerHTML =
-      'Câmara ativa — a procurar código <strong>Code 128 / GS1-128</strong>...';
-
-
-    /* -----------------------------------------------
-     * CRIAR LEITOR ZXING
-     * ----------------------------------------------- */
-
-    codeReader =
-      new ZXingBrowser.BrowserMultiFormatReader();
-
-
-    /* -----------------------------------------------
-     * COMEÇAR LEITURA
-     * ----------------------------------------------- */
-
-    codeReader.decodeFromVideoElement(
-
-      video,
-
-      (result,error) => {
-
-        /*
-         * Enquanto procura um código,
-         * o ZXing pode devolver erros normais.
-         *
-         * Não mostramos esses erros.
-         */
-
-        if(error){
-
-          return;
-
-        }
-
-
-        if(!result){
-
-          return;
-
-        }
-
-
-        if(
-          !scannerAtivo ||
-          codigoEncontrado
-        ){
-
-          return;
-
-        }
-
-
-        /* -------------------------------------------
-         * OBTER TEXTO DO CÓDIGO
-         * ------------------------------------------- */
-
-        let codigo =
-          '';
-
-        try{
-
-          codigo =
-            String(
-              result.getText() || ''
-            )
-            .trim()
-            .replace(
-              /\s+/g,
-              ''
-            );
-
-        }catch(e){
-
-          console.warn(
-            'Erro ao obter texto:',
-            e
-          );
-
-          return;
-
-        }
-
-
-        if(!codigo){
-
-          return;
-
-        }
-
-
-        /* -------------------------------------------
-         * VALIDAR MINIMAMENTE
-         *
-         * Os SSCC usados pelo sistema são numéricos
-         * e têm pelo menos 22 caracteres.
-         * ------------------------------------------- */
-
-        if(!/^\d+$/.test(codigo)){
-
-          status.innerHTML =
-            'Código encontrado, mas não é numérico. Continue a apontar para o SSCC.';
-
-          return;
-
-        }
-
-
-        if(codigo.length < 22){
-
-          status.innerHTML =
-            'Código demasiado curto para um SSCC. Continue a procurar.';
-
-          return;
-
-        }
-
-
-        /* -------------------------------------------
-         * SSCC ENCONTRADO
-         * ------------------------------------------- */
-
-        codigoEncontrado =
-          true;
-
-
-        status.className =
-          'status ok';
-
-
-        status.innerHTML =
-          '✓ SSCC encontrado. A enviar...';
-
-
-        resultadoCode.textContent =
-          codigo;
-
-
-        resultado.style.display =
-          'block';
-
-
-        /* -------------------------------------------
-         * PARAR CÂMARA
-         * ------------------------------------------- */
-
-        pararCamera();
-
-
-        /* -------------------------------------------
-         * DEVOLVER À APLICAÇÃO
-         * ------------------------------------------- */
-
-        devolverSSCC(
-          codigo
+        throw new Error(
+          'O navegador não suporta acesso à câmara.'
         );
 
       }
 
-    );
+
+      /*
+       * Primeiro tentamos a câmara traseira.
+       */
+
+      try{
+
+        cameraStream =
+          await navigator.mediaDevices.getUserMedia({
+
+            video:{
+              facingMode:{
+                ideal:'environment'
+              },
+
+              width:{
+                ideal:1920
+              },
+
+              height:{
+                ideal:1080
+              },
+
+              frameRate:{
+                ideal:30
+              }
+            },
+
+            audio:false
+
+          });
+
+      }catch(e){
+
+        console.warn(
+          'Falha na resolução preferida:',
+          e
+        );
 
 
-  }catch(e){
+        /*
+         * Fallback.
+         */
 
-    console.error(
-      'ERRO AO INICIAR CÂMARA:',
-      e
-    );
+        cameraStream =
+          await navigator.mediaDevices.getUserMedia({
 
+            video:true,
 
-    scannerAtivo =
-      false;
+            audio:false
 
+          });
 
-    limparCamera();
-
-
-    btnStart.disabled =
-      false;
-
-    btnStop.disabled =
-      true;
+      }
 
 
-    status.className =
-      'status error';
+      video.srcObject =
+        cameraStream;
 
 
-    status.innerHTML =
-      obterMensagemErro(
+      await video.play();
+
+
+      scannerAtivo = true;
+
+
+      cameraStatus.className =
+        'status ok';
+
+      cameraStatus.textContent =
+        '✓ Câmara ativa. Aponte o código de barras para a linha verde.';
+
+      debug.textContent =
+        'Leitura automática Code 128 / GS1-128 ativa.';
+
+
+      /*
+       * Criar leitor ZXing.
+       */
+
+      if(
+        !window.ZXingBrowser ||
+        !window.ZXingBrowser.BrowserMultiFormatReader
+      ){
+
+        throw new Error(
+          'Biblioteca de leitura de códigos não carregada.'
+        );
+
+      }
+
+
+      criarLeitor();
+
+    }catch(e){
+
+      console.error(
+        'ERRO AO INICIAR CÂMARA:',
         e
       );
 
+      pararCamera();
+
+      cameraStatus.className =
+        'status error';
+
+      cameraStatus.textContent =
+        traduzirErroCamera(e);
+
+      debug.textContent =
+        '';
+
+    }
+
   }
 
-}
 
+  /*
+   * ----------------------------------------------------
+   * CRIAR LEITOR
+   * ----------------------------------------------------
+   */
 
-/* =====================================================
- * DEVOLVER SSCC À APLICAÇÃO
- * ===================================================== */
+  function criarLeitor(){
 
-function devolverSSCC(
-  codigo
-){
-
-  try{
-
-    const returnUrl =
-      obterReturnUrl();
-
-
-    if(!returnUrl){
+    try{
 
       /*
-       * Se alguém abrir o scanner directamente,
-       * sem vir da aplicação, mostramos o SSCC
-       * mas não fazemos redirect.
+       * Tentamos configurar o ZXing para:
+       *
+       * - Code 128
+       * - maior esforço de leitura
+       *
+       * Se a versão carregada não expuser estes objetos,
+       * usamos o leitor normal.
        */
 
-      status.className =
+      let hints = null;
+
+
+      if(
+        window.ZXingBrowser.DecodeHintType &&
+        window.ZXingBrowser.BarcodeFormat
+      ){
+
+        hints = new Map();
+
+        hints.set(
+          window.ZXingBrowser.DecodeHintType.POSSIBLE_FORMATS,
+          [
+            window.ZXingBrowser.BarcodeFormat.CODE_128
+          ]
+        );
+
+        hints.set(
+          window.ZXingBrowser.DecodeHintType.TRY_HARDER,
+          true
+        );
+
+      }
+
+
+      if(hints){
+
+        codeReader =
+          new window.ZXingBrowser.BrowserMultiFormatReader(
+            hints
+          );
+
+      }else{
+
+        codeReader =
+          new window.ZXingBrowser.BrowserMultiFormatReader();
+
+      }
+
+
+      iniciarDecoding();
+
+    }catch(e){
+
+      console.error(
+        'Erro ao criar leitor:',
+        e
+      );
+
+      cameraStatus.className =
+        'status error';
+
+      cameraStatus.textContent =
+        'Não foi possível iniciar o leitor de códigos.';
+
+    }
+
+  }
+
+
+  /*
+   * ----------------------------------------------------
+   * DECODIFICAÇÃO
+   * ----------------------------------------------------
+   */
+
+  function iniciarDecoding(){
+
+    if(!codeReader){
+      return;
+    }
+
+    try{
+
+      codeReader.decodeFromVideoElement(
+        video,
+        function(result,error){
+
+          if(!scannerAtivo){
+            return;
+          }
+
+          if(codigoEncontrado){
+            return;
+          }
+
+
+          /*
+           * Se não encontrou nada,
+           * continuamos silenciosamente.
+           */
+
+          if(!result){
+
+            if(
+              error &&
+              error.name &&
+              error.name !==
+                'NotFoundException'
+            ){
+
+              /*
+               * Não mostramos erros normais
+               * de procura no ecrã.
+               */
+
+            }
+
+            return;
+          }
+
+
+          let codigo = '';
+
+          try{
+
+            codigo =
+              String(
+                result.getText() || ''
+              )
+              .trim()
+              .replace(/\s+/g,'');
+
+          }catch(e){
+
+            console.warn(
+              'Erro ao obter texto:',
+              e
+            );
+
+            return;
+
+          }
+
+
+          if(!codigo){
+            return;
+          }
+
+
+          debug.textContent =
+            'Código detetado: ' +
+            codigo;
+
+
+          /*
+           * ------------------------------------------------
+           * LIMPEZA
+           * ------------------------------------------------
+           *
+           * Alguns leitores podem devolver:
+           *
+           * (00)123456789012345678
+           *
+           * ou caracteres auxiliares.
+           *
+           * Primeiro retiramos espaços.
+           */
+
+          let codigoLimpo =
+            limparCodigoGS1(codigo);
+
+
+          /*
+           * O sistema atual trabalha com código
+           * exclusivamente numérico.
+           */
+
+          if(!/^\d+$/.test(codigoLimpo)){
+
+            cameraStatus.className =
+              'status warning';
+
+            cameraStatus.textContent =
+              'Código detetado, mas contém caracteres não numéricos. Continue a apontar para o SSCC.';
+
+            return;
+
+          }
+
+
+          /*
+           * Não aceitar códigos demasiado pequenos.
+           */
+
+          if(codigoLimpo.length < 22){
+
+            cameraStatus.className =
+              'status warning';
+
+            cameraStatus.textContent =
+              'Código detetado, mas demasiado curto para o SSCC deste sistema.';
+
+            return;
+
+          }
+
+
+          /*
+           * SUCESSO
+           */
+
+          codigoEncontrado = true;
+
+          cameraStatus.className =
+            'status ok';
+
+          cameraStatus.textContent =
+            '✓ SSCC encontrado. A enviar...';
+
+          resultadoCode.textContent =
+            codigoLimpo;
+
+          resultado.style.display =
+            'block';
+
+
+          pararCamera();
+
+
+          devolverSSCC(
+            codigoLimpo
+          );
+
+        }
+      );
+
+    }catch(e){
+
+      console.error(
+        'Erro no decode:',
+        e
+      );
+
+      cameraStatus.className =
+        'status error';
+
+      cameraStatus.textContent =
+        'Erro no leitor de códigos: ' +
+        e.message;
+
+    }
+
+  }
+
+
+  /*
+   * ----------------------------------------------------
+   * LIMPAR GS1 / CODE 128
+   * ----------------------------------------------------
+   */
+
+  function limparCodigoGS1(codigo){
+
+    let valor =
+      String(codigo || '')
+        .trim()
+        .replace(/\s+/g,'');
+
+
+    /*
+     * Retirar prefixo típico do AI (00)
+     * caso o leitor devolva "(00)".
+     */
+
+    if(
+      valor.startsWith('(00)')
+    ){
+
+      valor =
+        valor.substring(4);
+
+    }
+
+
+    /*
+     * Alguns leitores podem devolver
+     * o prefixo 00 diretamente.
+     *
+     * NÃO o retiramos automaticamente,
+     * porque o backend atual pode estar
+     * a trabalhar com a estrutura própria
+     * do teu SSCC.
+     */
+
+
+    /*
+     * Retirar caracteres GS1 invisíveis,
+     * se forem devolvidos.
+     */
+
+    valor =
+      valor.replace(
+        /[\x1D\x1E\x1F]/g,
+        ''
+      );
+
+
+    return valor;
+
+  }
+
+
+  /*
+   * ----------------------------------------------------
+   * PARAR CÂMARA
+   * ----------------------------------------------------
+   */
+
+  function pararCamera(){
+
+    scannerAtivo = false;
+
+
+    try{
+
+      if(codeReader){
+
+        try{
+
+          codeReader.reset();
+
+        }catch(e){
+
+          console.warn(
+            'Erro ao fazer reset do leitor:',
+            e
+          );
+
+        }
+
+      }
+
+    }catch(e){
+
+      console.warn(e);
+
+    }
+
+
+    codeReader = null;
+
+
+    if(cameraStream){
+
+      try{
+
+        cameraStream
+          .getTracks()
+          .forEach(
+            function(track){
+
+              track.stop();
+
+            }
+          );
+
+      }catch(e){
+
+        console.warn(e);
+
+      }
+
+    }
+
+
+    cameraStream = null;
+
+
+    try{
+
+      video.pause();
+      video.srcObject = null;
+
+    }catch(e){
+
+      console.warn(e);
+
+    }
+
+
+    btnStart.disabled = false;
+    btnStop.disabled = true;
+
+  }
+
+
+  /*
+   * ----------------------------------------------------
+   * DEVOLVER SSCC À APLICAÇÃO
+   * ----------------------------------------------------
+   */
+
+  function devolverSSCC(codigo){
+
+    try{
+
+      const params =
+        new URLSearchParams(
+          window.location.search
+        );
+
+      const returnUrl =
+        params.get('return');
+
+
+      if(!returnUrl){
+
+        cameraStatus.className =
+          'status error';
+
+        cameraStatus.textContent =
+          'SSCC encontrado, mas não foi definido um endereço de retorno.';
+
+        btnStart.disabled = false;
+
+        return;
+
+      }
+
+
+      let url;
+
+      try{
+
+        url =
+          new URL(returnUrl);
+
+      }catch(e){
+
+        throw new Error(
+          'O endereço de retorno não é válido.'
+        );
+
+      }
+
+
+      url.searchParams.set(
+        'sscc',
+        codigo
+      );
+
+
+      cameraStatus.className =
         'status ok';
 
-      status.innerHTML =
-        '✓ SSCC encontrado. Não foi definido um endereço de retorno.';
+      cameraStatus.textContent =
+        '✓ SSCC lido. A regressar à aplicação...';
 
-      btnStart.disabled =
-        false;
+
+      setTimeout(
+        function(){
+
+          window.location.href =
+            url.toString();
+
+        },
+        700
+      );
+
+
+    }catch(e){
+
+      console.error(
+        'ERRO AO DEVOLVER SSCC:',
+        e
+      );
+
+      cameraStatus.className =
+        'status error';
+
+      cameraStatus.textContent =
+        'SSCC encontrado, mas não foi possível regressar à aplicação.';
+
+      btnStart.disabled = false;
+
+    }
+
+  }
+
+
+  /*
+   * ----------------------------------------------------
+   * PROCESSAMENTO MANUAL
+   * ----------------------------------------------------
+   */
+
+  function processarManual(){
+
+    const codigo =
+      String(
+        scanner.value || ''
+      )
+      .trim()
+      .replace(/\s+/g,'');
+
+
+    if(!codigo){
+
+      alert(
+        'Introduza um SSCC.'
+      );
+
+      scanner.focus();
 
       return;
 
     }
 
 
-    /* -----------------------------------------------
-     * CONSTRUIR URL DE RETORNO
-     * ----------------------------------------------- */
+    resultadoCode.textContent =
+      codigo;
 
-    let url;
-
-
-    try{
-
-      url =
-        new URL(
-          returnUrl
-        );
-
-    }catch(e){
-
-      throw new Error(
-        'O endereço de retorno recebido não é válido.'
-      );
-
-    }
+    resultado.style.display =
+      'block';
 
 
-    /*
-     * Adiciona o SSCC:
-     *
-     * ?sscc=123456...
-     */
-
-    url.searchParams.set(
-      'sscc',
+    processarCodigo(
       codigo
     );
 
-
-    /*
-     * Pequeno atraso para o utilizador
-     * conseguir ver "SSCC encontrado".
-     */
-
-    setTimeout(
-      () => {
-
-        window.location.href =
-          url.toString();
-
-      },
-      500
-    );
-
-
-  }catch(e){
-
-    console.error(
-      'ERRO AO DEVOLVER SSCC:',
-      e
-    );
-
-
-    status.className =
-      'status error';
-
-
-    status.innerHTML =
-      'SSCC encontrado, mas não foi possível regressar à aplicação.';
-
-
-    btnStart.disabled =
-      false;
-
   }
 
-}
+
+  /*
+   * ----------------------------------------------------
+   * PROCESSAR SSCC
+   * ----------------------------------------------------
+   */
+
+  function processarCodigo(codigo){
+
+    const valor =
+      String(
+        codigo || ''
+      )
+      .trim()
+      .replace(/\s+/g,'');
 
 
-/* =====================================================
- * PARAR CÂMARA
- * ===================================================== */
+    if(!valor){
 
-function pararCamera(){
+      cameraStatus.className =
+        'status error';
 
-  scannerAtivo =
-    false;
+      cameraStatus.textContent =
+        'SSCC vazio.';
 
-
-  try{
-
-    if(codeReader){
-
-      if(
-        typeof codeReader.reset ===
-        'function'
-      ){
-
-        codeReader.reset();
-
-      }
+      return;
 
     }
 
-  }catch(e){
 
-    console.warn(
-      'Erro ao parar ZXing:',
-      e
-    );
+    cameraStatus.className =
+      'status';
 
-  }
+    cameraStatus.textContent =
+      'A processar SSCC...';
 
 
-  codeReader =
-    null;
+    /*
+     * Chamada ao Google Apps Script.
+     */
 
+    google.script.run
 
-  limparCamera();
-
-
-  btnStart.disabled =
-    false;
-
-  btnStop.disabled =
-    true;
-
-}
-
-
-/* =====================================================
- * LIMPAR STREAM
- * ===================================================== */
-
-function limparCamera(){
-
-  if(stream){
-
-    stream
-      .getTracks()
-      .forEach(
-        track => {
+      .withSuccessHandler(
+        function(resposta){
 
           try{
 
-            track.stop();
+            if(
+              resposta &&
+              resposta.ok
+            ){
+
+              cameraStatus.className =
+                'status ok';
+
+              cameraStatus.textContent =
+                resposta.mensagem ||
+                'SSCC processado com sucesso.';
+
+            }else{
+
+              cameraStatus.className =
+                'status error';
+
+              cameraStatus.textContent =
+                resposta &&
+                resposta.mensagem
+                  ? resposta.mensagem
+                  : 'Erro ao processar SSCC.';
+
+            }
 
           }catch(e){
 
-            console.warn(e);
+            console.error(e);
+
+            cameraStatus.className =
+              'status error';
+
+            cameraStatus.textContent =
+              'Resposta inválida do servidor.';
 
           }
 
         }
-      );
+      )
 
+      .withFailureHandler(
+        function(erro){
 
-    stream =
-      null;
+          console.error(
+            'Erro Google Apps Script:',
+            erro
+          );
 
-  }
+          cameraStatus.className =
+            'status error';
 
+          cameraStatus.textContent =
+            'Erro de comunicação com a aplicação.';
 
-  try{
+        }
+      )
 
-    video.pause();
-
-  }catch(e){
-
-    console.warn(e);
-
-  }
-
-
-  video.srcObject =
-    null;
-
-}
-
-
-/* =====================================================
- * MENSAGENS DE ERRO
- * ===================================================== */
-
-function obterMensagemErro(
-  e
-){
-
-  if(!e){
-
-    return 'Não foi possível iniciar a câmara.';
-
-  }
-
-
-  switch(e.name){
-
-    case 'NotAllowedError':
-
-    case 'PermissionDeniedError':
-
-      return `
-        Permissão da câmara recusada.
-        Permita o acesso à câmara neste site
-        e tente novamente.
-      `;
-
-
-    case 'NotFoundError':
-
-    case 'DevicesNotFoundError':
-
-      return `
-        Não foi encontrada nenhuma câmara
-        neste dispositivo.
-      `;
-
-
-    case 'NotReadableError':
-
-    case 'TrackStartError':
-
-      return `
-        A câmara está a ser utilizada por
-        outra aplicação. Feche essa aplicação
-        e tente novamente.
-      `;
-
-
-    case 'OverconstrainedError':
-
-      return `
-        Não foi possível utilizar a câmara
-        traseira com estas definições.
-        Tente novamente.
-      `;
-
-
-    case 'SecurityError':
-
-      return `
-        O navegador bloqueou o acesso à câmara
-        por motivos de segurança.
-      `;
-
-
-    case 'AbortError':
-
-      return `
-        O acesso à câmara foi interrompido.
-        Tente novamente.
-      `;
-
-
-    default:
-
-      return (
-        e.message ||
-        'Não foi possível iniciar a câmara.'
+      .webProcessarSSCC(
+        valor
       );
 
   }
 
-}
+
+  /*
+   * ----------------------------------------------------
+   * ERROS DA CÂMARA
+   * ----------------------------------------------------
+   */
+
+  function traduzirErroCamera(erro){
+
+    if(!erro){
+      return 'Não foi possível iniciar a câmara.';
+    }
 
 
-/* =====================================================
- * BOTÕES
- * ===================================================== */
-
-btnStart.addEventListener(
-  'click',
-  iniciarCamera
-);
+    const nome =
+      erro.name || '';
 
 
-btnStop.addEventListener(
-  'click',
-  () => {
+    if(
+      nome ===
+      'NotAllowedError'
+    ){
 
-    pararCamera();
-
-
-    status.className =
-      'status';
-
-
-    status.innerHTML =
-      'Câmara desligada. Prima <strong>Iniciar câmara</strong> para tentar novamente.';
-
-  }
-);
-
-
-/* =====================================================
- * SAÍDA DA PÁGINA
- * ===================================================== */
-
-window.addEventListener(
-  'beforeunload',
-  () => {
-
-    limparCamera();
-
-  }
-);
-
-
-/* =====================================================
- * ARRANQUE
- * ===================================================== */
-
-window.addEventListener(
-  'load',
-  () => {
-
-    /*
-     * Não abrimos a câmara automaticamente.
-     *
-     * O utilizador deve carregar em
-     * "Iniciar câmara".
-     */
-
-    const returnUrl =
-      obterReturnUrl();
-
-
-    if(returnUrl){
-
-      console.log(
-        'Endereço de retorno recebido.'
-      );
+      return 'PERMISSÃO DE CÂMARA RECUSADA. Verifique as permissões do navegador.';
 
     }
 
+
+    if(
+      nome ===
+      'NotFoundError'
+    ){
+
+      return 'Não foi encontrada nenhuma câmara neste dispositivo.';
+
+    }
+
+
+    if(
+      nome ===
+      'NotReadableError'
+    ){
+
+      return 'A câmara está a ser utilizada por outra aplicação.';
+
+    }
+
+
+    if(
+      nome ===
+      'SecurityError'
+    ){
+
+      return 'O navegador bloqueou o acesso à câmara por motivos de segurança.';
+
+    }
+
+
+    if(
+      nome ===
+      'AbortError'
+    ){
+
+      return 'O acesso à câmara foi interrompido.';
+
+    }
+
+
+    return (
+      'Não foi possível iniciar a câmara: ' +
+      (erro.message || nome)
+    );
+
   }
-);
+
+
+  /*
+   * ----------------------------------------------------
+   * ENTER NO CAMPO MANUAL
+   * ----------------------------------------------------
+   */
+
+  scanner.addEventListener(
+    'keydown',
+    function(e){
+
+      if(
+        e.key ===
+        'Enter'
+      ){
+
+        e.preventDefault();
+
+        processarManual();
+
+      }
+
+    }
+  );
+
 
 </script>
 
