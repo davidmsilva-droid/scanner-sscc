@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-PT">
+
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -8,11 +10,21 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
   >
 
-  <title>Scanner SSCC</title>
+  <meta
+    name="theme-color"
+    content="#17324d"
+  >
+
+  <title>
+    Scanner SSCC
+  </title>
+
 
   <style>
+
     :root{
       --navy:#17324d;
+      --navy2:#234b69;
       --bg:#0b121b;
       --panel:#142231;
       --panel2:#0f1a26;
@@ -24,9 +36,11 @@
       --danger:#e06b75;
     }
 
+
     *{
       box-sizing:border-box;
     }
+
 
     html,
     body{
@@ -36,371 +50,759 @@
       min-height:100%;
       background:var(--bg);
       color:var(--text);
-      font-family:Inter,Arial,sans-serif;
+      font-family:
+        Inter,
+        Arial,
+        sans-serif;
     }
+
 
     body{
+
       min-height:100vh;
+
       display:flex;
+
       flex-direction:column;
+
+      background:
+        radial-gradient(
+          circle at top,
+          #1a3044 0,
+          #0b121b 52%
+        );
+
     }
+
 
     header{
-      background:linear-gradient(135deg,#17324d,#234b69);
-      padding:20px;
+
+      background:
+        linear-gradient(
+          135deg,
+          var(--navy),
+          var(--navy2)
+        );
+
+      padding:
+        20px
+        16px;
+
       text-align:center;
+
       font-weight:800;
-      font-size:22px;
-      box-shadow:0 5px 22px #0005;
+
+      font-size:
+        clamp(
+          20px,
+          5vw,
+          28px
+        );
+
+      letter-spacing:.3px;
+
+      box-shadow:
+        0 5px 22px #0005;
+
     }
+
 
     .sub{
+
       font-size:12px;
+
       font-weight:500;
+
       color:#c9d9e5;
+
       margin-top:7px;
+
       letter-spacing:1px;
+
       text-transform:uppercase;
+
     }
+
 
     main{
-      width:min(820px,94%);
-      margin:20px auto;
+
+      width:
+        min(
+          760px,
+          94%
+        );
+
+      margin:
+        20px auto;
+
       flex:1;
+
+      display:flex;
+
+      flex-direction:column;
+
     }
+
+
+    .card{
+
+      background:
+        linear-gradient(
+          145deg,
+          #182a3a,
+          #12202d
+        );
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius:18px;
+
+      padding:20px;
+
+      box-shadow:
+        0 12px 32px #0004;
+
+    }
+
+
+    .label{
+
+      font-size:11px;
+
+      color:var(--muted);
+
+      margin-bottom:10px;
+
+      text-transform:uppercase;
+
+      font-weight:800;
+
+      letter-spacing:1.3px;
+
+    }
+
 
     .camera-wrap{
+
       position:relative;
+
       width:100%;
+
       overflow:hidden;
-      border-radius:16px;
+
+      border-radius:14px;
+
       background:#050b11;
-      border:1px solid #2a4051;
-      box-shadow:0 12px 32px #0005;
+
+      border:
+        1px solid
+        #2a4051;
+
     }
+
 
     #video{
+
       width:100%;
+
       display:block;
-      height:auto;
-      min-height:300px;
-      max-height:75vh;
+
+      min-height:280px;
+
+      max-height:620px;
+
       object-fit:cover;
+
       background:#050b11;
+
     }
+
 
     .scanner-frame{
+
       position:absolute;
+
       left:7%;
+
       right:7%;
-      top:32%;
-      height:36%;
-      border:3px solid var(--accent);
+
+      top:35%;
+
+      height:30%;
+
+      border:
+        3px solid
+        var(--accent);
+
       border-radius:12px;
+
       box-shadow:
-        0 0 0 9999px rgba(0,0,0,.30),
-        0 0 25px rgba(120,178,214,.45);
+
+        0 0 0 9999px
+        rgba(0,0,0,.22),
+
+        0 0 25px
+        rgba(120,178,214,.35);
+
       pointer-events:none;
+
     }
+
 
     .scanner-line{
+
       position:absolute;
+
       left:8%;
+
       right:8%;
-      top:50%;
+
+      top:49%;
+
       height:2px;
+
       background:var(--accent);
-      box-shadow:0 0 10px var(--accent);
-      animation:scanline 1.8s ease-in-out infinite;
+
+      box-shadow:
+        0 0 10px
+        rgba(120,178,214,.9);
+
+      opacity:.9;
+
       pointer-events:none;
+
     }
 
-    @keyframes scanline{
-      0%,100%{
-        transform:translateY(-70px);
-      }
-
-      50%{
-        transform:translateY(70px);
-      }
-    }
 
     .status{
-      margin-top:14px;
-      padding:14px;
-      border-radius:11px;
+
+      margin-top:12px;
+
+      padding:
+        12px
+        14px;
+
+      border-radius:10px;
+
       background:#0b1621;
-      border:1px solid #2a3e50;
+
+      border:
+        1px solid
+        #2a3e50;
+
+      color:#b9cad7;
+
+      font-size:13px;
+
       text-align:center;
-      color:#c8d7e2;
-      font-size:14px;
+
+      line-height:1.4;
+
     }
+
 
     .status.ok{
-      background:#173c32;
-      border-color:#2d765d;
+
       color:#bff0d8;
+
+      background:
+        linear-gradient(
+          135deg,
+          #173c32,
+          #1b302b
+        );
+
+      border-color:#2d765d;
+
     }
+
 
     .status.error{
-      background:#43252c;
-      border-color:#8c4652;
+
       color:#ffc5cb;
+
+      background:
+        linear-gradient(
+          135deg,
+          #43252c,
+          #301d25
+        );
+
+      border-color:#8c4652;
+
     }
 
-    .code{
-      margin-top:14px;
-      padding:15px;
-      border-radius:11px;
-      background:#0b1621;
-      border:1px solid #2a3e50;
-      text-align:center;
-      font-size:20px;
-      font-weight:800;
-      word-break:break-all;
-    }
 
     .buttons{
+
       display:flex;
+
       gap:12px;
+
       margin-top:14px;
+
     }
+
 
     button{
+
       flex:1;
+
       border:0;
-      border-radius:11px;
-      padding:15px;
-      font-weight:800;
+
+      border-radius:10px;
+
+      padding:
+        14px
+        18px;
+
       font-size:15px;
+
+      font-weight:800;
+
       cursor:pointer;
+
+      transition:
+        transform .15s,
+        filter .15s;
+
     }
 
-    #btnStart{
-      background:var(--accent);
-      color:#071019;
+
+    button:hover{
+
+      filter:brightness(1.1);
+
+      transform:
+        translateY(-1px);
+
     }
 
-    #btnStop{
-      background:#354b5d;
-      color:white;
-    }
 
     button:disabled{
+
       opacity:.5;
+
       cursor:not-allowed;
+
+      transform:none;
+
     }
 
-    .help{
-      margin-top:15px;
-      color:var(--muted);
-      font-size:12px;
-      text-align:center;
-      line-height:1.5;
+
+    .primary{
+
+      background:var(--accent);
+
+      color:#071019;
+
     }
+
+
+    .secondary{
+
+      background:#354b5d;
+
+      color:white;
+
+    }
+
+
+    .resultado{
+
+      display:none;
+
+      margin-top:18px;
+
+      padding:16px;
+
+      border-radius:12px;
+
+      background:#0b1621;
+
+      border:
+        1px solid
+        #2a3e50;
+
+      text-align:center;
+
+    }
+
+
+    .resultado-title{
+
+      font-size:12px;
+
+      color:var(--muted);
+
+      text-transform:uppercase;
+
+      letter-spacing:1px;
+
+      font-weight:800;
+
+      margin-bottom:8px;
+
+    }
+
+
+    .resultado-code{
+
+      font-size:
+        clamp(
+          18px,
+          4vw,
+          25px
+        );
+
+      font-weight:900;
+
+      word-break:
+        break-all;
+
+      color:#f4f7fa;
+
+    }
+
+
+    .info{
+
+      margin-top:14px;
+
+      padding:
+        12px
+        14px;
+
+      border-radius:10px;
+
+      background:#0d1924;
+
+      border:
+        1px solid
+        #263b4c;
+
+      color:#9eb0bf;
+
+      font-size:12px;
+
+      line-height:1.5;
+
+      text-align:center;
+
+    }
+
 
     footer{
-      padding:14px;
+
+      padding:15px;
+
       text-align:center;
+
       color:#8298aa;
+
       font-size:11px;
-      border-top:1px solid #223746;
+
+      border-top:
+        1px solid
+        #223746;
+
       background:#09131d;
+
     }
+
 
     @media(max-width:600px){
 
-      header{
-        font-size:18px;
-        padding:17px;
+      main{
+
+        width:94%;
+
+        margin:
+          14px auto;
+
       }
 
-      main{
-        width:94%;
-        margin:14px auto;
+
+      .card{
+
+        padding:15px;
+
+        border-radius:14px;
+
       }
+
 
       #video{
+
         min-height:300px;
+
         max-height:70vh;
+
       }
+
 
       .buttons{
+
         flex-direction:column;
+
       }
+
+
+      button{
+
+        width:100%;
+
+      }
+
     }
+
   </style>
 
-  <script src="https://unpkg.com/@zxing/browser@latest"></script>
+
+  <!--
+    ZXing Browser
+
+    Responsável pela leitura de
+    Code 128 / GS1-128.
+  -->
+
+  <script
+    src="https://unpkg.com/@zxing/browser@latest">
+  </script>
+
 </head>
+
 
 <body>
 
+
 <header>
-  SCANNER SSCC
-  <div class="sub">Code 128 / GS1-128</div>
+
+  Scanner SSCC
+
+  <div class="sub">
+    Leitura Code 128 / GS1-128
+  </div>
+
 </header>
+
 
 <main>
 
-  <div class="camera-wrap">
 
-    <video
-      id="video"
-      autoplay
-      muted
-      playsinline
-      webkit-playsinline>
-    </video>
+  <section class="card">
 
-    <div class="scanner-frame"></div>
-    <div class="scanner-line"></div>
+    <div class="label">
+      Câmara
+    </div>
 
-  </div>
 
-  <div id="status" class="status">
-    Câmara desligada
-  </div>
+    <div class="camera-wrap">
 
-  <div
-    id="code"
-    class="code"
-    style="display:none">
-  </div>
+      <video
+        id="video"
+        autoplay
+        muted
+        playsinline
+        webkit-playsinline>
+      </video>
 
-  <div class="buttons">
 
-    <button
-      id="btnStart"
-      onclick="iniciarScanner()">
-      Iniciar câmara
-    </button>
+      <div class="scanner-frame"></div>
 
-    <button
-      id="btnStop"
-      onclick="pararScanner()"
-      disabled>
-      Parar
-    </button>
+      <div class="scanner-line"></div>
 
-  </div>
+    </div>
 
-  <div class="help">
-    Aponte a câmara para o código SSCC e mantenha-o dentro da zona de leitura.
-    <br>
-    A leitura é contínua e termina automaticamente quando o código for encontrado.
-  </div>
+
+    <div
+      id="status"
+      class="status">
+
+      Prima
+      <strong>
+        Iniciar câmara
+      </strong>
+      para começar.
+
+    </div>
+
+
+    <div class="buttons">
+
+      <button
+        id="btnStart"
+        class="primary">
+
+        Iniciar câmara
+
+      </button>
+
+
+      <button
+        id="btnStop"
+        class="secondary"
+        disabled>
+
+        Parar
+
+      </button>
+
+    </div>
+
+
+    <div
+      id="resultado"
+      class="resultado">
+
+      <div class="resultado-title">
+        SSCC encontrado
+      </div>
+
+      <div
+        id="resultadoCode"
+        class="resultado-code">
+      </div>
+
+    </div>
+
+
+    <div class="info">
+
+      Aponte a câmara para o código de barras
+      <strong>Code 128 / GS1-128</strong>.
+      O código será enviado automaticamente
+      para a aplicação de receção.
+
+    </div>
+
+  </section>
+
 
 </main>
 
+
 <footer>
+
   SSCC - CONTROLO DE RECEÇÃO CFL . SFW
+
 </footer>
 
 
 <script>
 
+
+/* =====================================================
+ * ELEMENTOS
+ * ===================================================== */
+
 const video =
-  document.getElementById('video');
+  document.getElementById(
+    'video'
+  );
 
-const statusBox =
-  document.getElementById('status');
 
-const codeBox =
-  document.getElementById('code');
+const status =
+  document.getElementById(
+    'status'
+  );
+
 
 const btnStart =
-  document.getElementById('btnStart');
+  document.getElementById(
+    'btnStart'
+  );
+
 
 const btnStop =
-  document.getElementById('btnStop');
+  document.getElementById(
+    'btnStop'
+  );
 
 
-let reader = null;
-let stream = null;
-let scannerAtivo = false;
-let codigoEncontrado = false;
+const resultado =
+  document.getElementById(
+    'resultado'
+  );
+
+
+const resultadoCode =
+  document.getElementById(
+    'resultadoCode'
+  );
 
 
 /* =====================================================
- * OBTER URL DE RETORNO
+ * ESTADO
+ * ===================================================== */
+
+let stream =
+  null;
+
+let codeReader =
+  null;
+
+let scannerAtivo =
+  false;
+
+let codigoEncontrado =
+  false;
+
+
+/* =====================================================
+ * URL DE RETORNO
+ *
+ * O Scanner_Telemovel.html abre esta página com:
+ *
+ * ?return=https%3A%2F%2F...
+ *
  * ===================================================== */
 
 function obterReturnUrl(){
 
-  const params =
-    new URLSearchParams(
-      window.location.search
-    );
-
-  return (
-    params.get('return') ||
-    ''
-  );
-}
-
-
-/* =====================================================
- * NORMALIZAR URL
- * ===================================================== */
-
-function prepararReturnUrl(codigo){
-
-  const returnUrl =
-    obterReturnUrl();
-
-  if(!returnUrl){
-    return null;
-  }
-
   try{
 
-    const url =
-      new URL(returnUrl);
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
 
-    /*
-     * O SSCC é devolvido através do parâmetro sscc.
-     */
 
-    url.searchParams.set(
-      'sscc',
-      codigo
-    );
-
-    return url.toString();
+    return params.get(
+      'return'
+    ) || '';
 
   }catch(e){
 
-    console.error(
-      'URL de retorno inválido:',
-      e
-    );
+    console.error(e);
 
-    return null;
+    return '';
+
   }
+
 }
 
 
 /* =====================================================
- * INICIAR SCANNER
+ * INICIAR CÂMARA
  * ===================================================== */
 
-async function iniciarScanner(){
+async function iniciarCamera(){
 
   if(scannerAtivo){
+
     return;
+
   }
+
 
   try{
 
     codigoEncontrado =
       false;
 
-    codeBox.style.display =
-      'none';
-
-    codeBox.textContent =
-      '';
 
     btnStart.disabled =
       true;
@@ -408,22 +810,33 @@ async function iniciarScanner(){
     btnStop.disabled =
       false;
 
-    statusBox.className =
+
+    resultado.style.display =
+      'none';
+
+
+    resultadoCode.textContent =
+      '';
+
+
+    status.className =
       'status';
 
-    statusBox.textContent =
+
+    status.innerHTML =
       'A pedir acesso à câmara...';
 
 
-    /* -------------------------------------------------
-     * VERIFICAÇÕES
-     * ------------------------------------------------- */
+    /* -----------------------------------------------
+     * VERIFICAR SUPORTE
+     * ----------------------------------------------- */
 
     if(!window.isSecureContext){
 
       throw new Error(
-        'A câmara requer uma página HTTPS.'
+        'Esta página não está a ser executada em HTTPS.'
       );
+
     }
 
 
@@ -433,8 +846,9 @@ async function iniciarScanner(){
     ){
 
       throw new Error(
-        'Este navegador não suporta acesso à câmara.'
+        'Este navegador não disponibiliza acesso à câmara.'
       );
+
     }
 
 
@@ -444,22 +858,25 @@ async function iniciarScanner(){
     ){
 
       throw new Error(
-        'O leitor de códigos não foi carregado. Verifique a ligação à Internet.'
+        'O leitor de códigos não foi carregado. Verifique a ligação à Internet e tente novamente.'
       );
+
     }
 
 
-    /* -------------------------------------------------
-     * PEDIR CÂMARA
-     *
-     * Como esta página é independente e de topo,
-     * getUserMedia() pode pedir a autorização normal.
-     * ------------------------------------------------- */
+    /* -----------------------------------------------
+     * PEDIR CÂMARA TRASEIRA
+     * ----------------------------------------------- */
+
+    status.innerHTML =
+      'A abrir a câmara traseira...';
+
 
     stream =
       await navigator.mediaDevices.getUserMedia({
 
         video:{
+
           facingMode:{
             ideal:'environment'
           },
@@ -475,6 +892,7 @@ async function iniciarScanner(){
           frameRate:{
             ideal:30
           }
+
         },
 
         audio:false
@@ -482,9 +900,18 @@ async function iniciarScanner(){
       });
 
 
-    /* -------------------------------------------------
-     * VIDEO
-     * ------------------------------------------------- */
+    if(!stream){
+
+      throw new Error(
+        'Não foi possível obter a câmara.'
+      );
+
+    }
+
+
+    /* -----------------------------------------------
+     * LIGAR STREAM AO VÍDEO
+     * ----------------------------------------------- */
 
     video.srcObject =
       stream;
@@ -502,52 +929,81 @@ async function iniciarScanner(){
       ''
     );
 
-    await video.play();
+
+    try{
+
+      await video.play();
+
+    }catch(e){
+
+      console.warn(
+        'video.play():',
+        e
+      );
+
+    }
 
 
     scannerAtivo =
       true;
 
 
-    statusBox.textContent =
-      'Câmara ativa — procure o SSCC...';
+    status.innerHTML =
+      'Câmara ativa — a procurar código <strong>Code 128 / GS1-128</strong>...';
 
 
-    /* -------------------------------------------------
-     * ZXING
-     * ------------------------------------------------- */
+    /* -----------------------------------------------
+     * CRIAR LEITOR ZXING
+     * ----------------------------------------------- */
 
-    reader =
+    codeReader =
       new ZXingBrowser.BrowserMultiFormatReader();
 
 
-    reader.decodeFromVideoElement(
+    /* -----------------------------------------------
+     * COMEÇAR LEITURA
+     * ----------------------------------------------- */
+
+    codeReader.decodeFromVideoElement(
+
       video,
 
       (result,error) => {
+
+        /*
+         * Enquanto procura um código,
+         * o ZXing pode devolver erros normais.
+         *
+         * Não mostramos esses erros.
+         */
+
+        if(error){
+
+          return;
+
+        }
+
+
+        if(!result){
+
+          return;
+
+        }
+
 
         if(
           !scannerAtivo ||
           codigoEncontrado
         ){
+
           return;
+
         }
 
 
-        /*
-         * Os erros normais enquanto procura
-         * um código são ignorados.
-         */
-
-        if(error){
-          return;
-        }
-
-
-        if(!result){
-          return;
-        }
-
+        /* -------------------------------------------
+         * OBTER TEXTO DO CÓDIGO
+         * ------------------------------------------- */
 
         let codigo =
           '';
@@ -557,116 +1013,107 @@ async function iniciarScanner(){
           codigo =
             String(
               result.getText() || ''
-            ).trim();
+            )
+            .trim()
+            .replace(
+              /\s+/g,
+              ''
+            );
 
         }catch(e){
 
+          console.warn(
+            'Erro ao obter texto:',
+            e
+          );
+
           return;
+
         }
 
 
         if(!codigo){
+
           return;
+
         }
 
 
-        /* -------------------------------------------------
-         * VALIDAR MINIMAMENTE COMO SSCC
-         * ------------------------------------------------- */
-
-        codigo =
-          codigo.replace(
-            /\s+/g,
-            ''
-          );
-
+        /* -------------------------------------------
+         * VALIDAR MINIMAMENTE
+         *
+         * Os SSCC usados pelo sistema são numéricos
+         * e têm pelo menos 22 caracteres.
+         * ------------------------------------------- */
 
         if(!/^\d+$/.test(codigo)){
 
-          statusBox.textContent =
-            'Código encontrado, mas não é numérico. Continue a procurar...';
+          status.innerHTML =
+            'Código encontrado, mas não é numérico. Continue a apontar para o SSCC.';
 
           return;
+
         }
 
 
         if(codigo.length < 22){
 
-          statusBox.textContent =
-            'Código demasiado curto. Continue a procurar...';
+          status.innerHTML =
+            'Código demasiado curto para um SSCC. Continue a procurar.';
 
           return;
+
         }
 
 
-        /* -------------------------------------------------
+        /* -------------------------------------------
          * SSCC ENCONTRADO
-         * ------------------------------------------------- */
+         * ------------------------------------------- */
 
         codigoEncontrado =
           true;
 
-        statusBox.className =
+
+        status.className =
           'status ok';
 
-        statusBox.textContent =
-          'SSCC encontrado — a enviar...';
 
-        codeBox.style.display =
-          'block';
+        status.innerHTML =
+          '✓ SSCC encontrado. A enviar...';
 
-        codeBox.textContent =
+
+        resultadoCode.textContent =
           codigo;
 
 
-        pararScanner();
+        resultado.style.display =
+          'block';
 
 
-        /* -------------------------------------------------
-         * DEVOLVER AO SISTEMA
-         * ------------------------------------------------- */
+        /* -------------------------------------------
+         * PARAR CÂMARA
+         * ------------------------------------------- */
 
-        const returnUrl =
-          prepararReturnUrl(codigo);
-
-
-        if(returnUrl){
-
-          /*
-           * Pequeno atraso para o utilizador ver
-           * que o código foi encontrado.
-           */
-
-          setTimeout(
-            () => {
-
-              window.location.href =
-                returnUrl;
-
-            },
-            250
-          );
-
-          return;
-        }
+        pararCamera();
 
 
-        /*
-         * Se não houver URL de retorno,
-         * mantemos o código visível.
-         */
+        /* -------------------------------------------
+         * DEVOLVER À APLICAÇÃO
+         * ------------------------------------------- */
 
-        statusBox.textContent =
-          'SSCC encontrado.';
+        devolverSSCC(
+          codigo
+        );
 
       }
+
     );
 
 
   }catch(e){
 
     console.error(
-      'Erro ao iniciar scanner:',
+      'ERRO AO INICIAR CÂMARA:',
       e
     );
 
@@ -675,26 +1122,7 @@ async function iniciarScanner(){
       false;
 
 
-    if(stream){
-
-      stream
-        .getTracks()
-        .forEach(
-          track => {
-
-            try{
-              track.stop();
-            }catch(_){}
-          }
-        );
-
-      stream =
-        null;
-    }
-
-
-    video.srcObject =
-      null;
+    limparCamera();
 
 
     btnStart.disabled =
@@ -704,79 +1132,136 @@ async function iniciarScanner(){
       true;
 
 
-    statusBox.className =
+    status.className =
       'status error';
 
 
-    let mensagem =
-      'Não foi possível iniciar a câmara.';
+    status.innerHTML =
+      obterMensagemErro(
+        e
+      );
 
-
-    if(e){
-
-      switch(e.name){
-
-        case 'NotAllowedError':
-
-          mensagem =
-            'O acesso à câmara foi recusado. Autorize a câmara para este site no Chrome.';
-
-          break;
-
-
-        case 'NotFoundError':
-
-          mensagem =
-            'Não foi encontrada nenhuma câmara.';
-
-          break;
-
-
-        case 'NotReadableError':
-
-          mensagem =
-            'A câmara está a ser utilizada por outra aplicação.';
-
-          break;
-
-
-        case 'OverconstrainedError':
-
-          mensagem =
-            'As definições solicitadas não são suportadas por esta câmara.';
-
-          break;
-
-
-        case 'SecurityError':
-
-          mensagem =
-            'O navegador bloqueou o acesso à câmara por motivos de segurança.';
-
-          break;
-
-
-        default:
-
-          if(e.message){
-            mensagem =
-              e.message;
-          }
-      }
-    }
-
-
-    statusBox.textContent =
-      mensagem;
   }
+
 }
 
 
 /* =====================================================
- * PARAR
+ * DEVOLVER SSCC À APLICAÇÃO
  * ===================================================== */
 
-function pararScanner(){
+function devolverSSCC(
+  codigo
+){
+
+  try{
+
+    const returnUrl =
+      obterReturnUrl();
+
+
+    if(!returnUrl){
+
+      /*
+       * Se alguém abrir o scanner directamente,
+       * sem vir da aplicação, mostramos o SSCC
+       * mas não fazemos redirect.
+       */
+
+      status.className =
+        'status ok';
+
+      status.innerHTML =
+        '✓ SSCC encontrado. Não foi definido um endereço de retorno.';
+
+      btnStart.disabled =
+        false;
+
+      return;
+
+    }
+
+
+    /* -----------------------------------------------
+     * CONSTRUIR URL DE RETORNO
+     * ----------------------------------------------- */
+
+    let url;
+
+
+    try{
+
+      url =
+        new URL(
+          returnUrl
+        );
+
+    }catch(e){
+
+      throw new Error(
+        'O endereço de retorno recebido não é válido.'
+      );
+
+    }
+
+
+    /*
+     * Adiciona o SSCC:
+     *
+     * ?sscc=123456...
+     */
+
+    url.searchParams.set(
+      'sscc',
+      codigo
+    );
+
+
+    /*
+     * Pequeno atraso para o utilizador
+     * conseguir ver "SSCC encontrado".
+     */
+
+    setTimeout(
+      () => {
+
+        window.location.href =
+          url.toString();
+
+      },
+      500
+    );
+
+
+  }catch(e){
+
+    console.error(
+      'ERRO AO DEVOLVER SSCC:',
+      e
+    );
+
+
+    status.className =
+      'status error';
+
+
+    status.innerHTML =
+      'SSCC encontrado, mas não foi possível regressar à aplicação.';
+
+
+    btnStart.disabled =
+      false;
+
+  }
+
+}
+
+
+/* =====================================================
+ * PARAR CÂMARA
+ * ===================================================== */
+
+function pararCamera(){
 
   scannerAtivo =
     false;
@@ -784,26 +1269,50 @@ function pararScanner(){
 
   try{
 
-    if(reader){
+    if(codeReader){
 
       if(
-        typeof reader.reset ===
+        typeof codeReader.reset ===
         'function'
       ){
 
-        reader.reset();
+        codeReader.reset();
+
       }
+
     }
 
   }catch(e){
 
-    console.warn(e);
+    console.warn(
+      'Erro ao parar ZXing:',
+      e
+    );
+
   }
 
 
-  reader =
+  codeReader =
     null;
 
+
+  limparCamera();
+
+
+  btnStart.disabled =
+    false;
+
+  btnStop.disabled =
+    true;
+
+}
+
+
+/* =====================================================
+ * LIMPAR STREAM
+ * ===================================================== */
+
+function limparCamera(){
 
   if(stream){
 
@@ -813,46 +1322,198 @@ function pararScanner(){
         track => {
 
           try{
+
             track.stop();
-          }catch(_){}
+
+          }catch(e){
+
+            console.warn(e);
+
+          }
+
         }
       );
 
+
     stream =
       null;
+
   }
 
 
   try{
+
     video.pause();
-  }catch(_){}
+
+  }catch(e){
+
+    console.warn(e);
+
+  }
 
 
   video.srcObject =
     null;
 
-
-  btnStart.disabled =
-    false;
-
-  btnStop.disabled =
-    true;
-
-
-  if(!codigoEncontrado){
-
-    statusBox.className =
-      'status';
-
-    statusBox.textContent =
-      'Câmara desligada';
-  }
 }
 
 
+/* =====================================================
+ * MENSAGENS DE ERRO
+ * ===================================================== */
+
+function obterMensagemErro(
+  e
+){
+
+  if(!e){
+
+    return 'Não foi possível iniciar a câmara.';
+
+  }
+
+
+  switch(e.name){
+
+    case 'NotAllowedError':
+
+    case 'PermissionDeniedError':
+
+      return `
+        Permissão da câmara recusada.
+        Permita o acesso à câmara neste site
+        e tente novamente.
+      `;
+
+
+    case 'NotFoundError':
+
+    case 'DevicesNotFoundError':
+
+      return `
+        Não foi encontrada nenhuma câmara
+        neste dispositivo.
+      `;
+
+
+    case 'NotReadableError':
+
+    case 'TrackStartError':
+
+      return `
+        A câmara está a ser utilizada por
+        outra aplicação. Feche essa aplicação
+        e tente novamente.
+      `;
+
+
+    case 'OverconstrainedError':
+
+      return `
+        Não foi possível utilizar a câmara
+        traseira com estas definições.
+        Tente novamente.
+      `;
+
+
+    case 'SecurityError':
+
+      return `
+        O navegador bloqueou o acesso à câmara
+        por motivos de segurança.
+      `;
+
+
+    case 'AbortError':
+
+      return `
+        O acesso à câmara foi interrompido.
+        Tente novamente.
+      `;
+
+
+    default:
+
+      return (
+        e.message ||
+        'Não foi possível iniciar a câmara.'
+      );
+
+  }
+
+}
+
+
+/* =====================================================
+ * BOTÕES
+ * ===================================================== */
+
+btnStart.addEventListener(
+  'click',
+  iniciarCamera
+);
+
+
+btnStop.addEventListener(
+  'click',
+  () => {
+
+    pararCamera();
+
+
+    status.className =
+      'status';
+
+
+    status.innerHTML =
+      'Câmara desligada. Prima <strong>Iniciar câmara</strong> para tentar novamente.';
+
+  }
+);
+
+
+/* =====================================================
+ * SAÍDA DA PÁGINA
+ * ===================================================== */
+
 window.addEventListener(
   'beforeunload',
-  pararScanner
+  () => {
+
+    limparCamera();
+
+  }
+);
+
+
+/* =====================================================
+ * ARRANQUE
+ * ===================================================== */
+
+window.addEventListener(
+  'load',
+  () => {
+
+    /*
+     * Não abrimos a câmara automaticamente.
+     *
+     * O utilizador deve carregar em
+     * "Iniciar câmara".
+     */
+
+    const returnUrl =
+      obterReturnUrl();
+
+
+    if(returnUrl){
+
+      console.log(
+        'Endereço de retorno recebido.'
+      );
+
+    }
+
+  }
 );
 
 </script>
