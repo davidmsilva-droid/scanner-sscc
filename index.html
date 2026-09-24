@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
+  <title>Scanner SSCC</title>
+
+  <style>
+    :root{
+      --navy:#17324d;
+      --bg:#0b121b;
+      --panel:#142231;
+      --panel2:#0f1a26;
+      --line:#2b4052;
+      --text:#f4f7fa;
+      --muted:#9eb0bf;
+      --accent:#78b2d6;
+      --ok:#35b779;
+      --danger:#e06b75;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    html,
+    body{
+      margin:0;
+      padding:0;
+      width:100%;
+      min-height:100%;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Inter,Arial,sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    header{
+      background:linear-gradient(135deg,#17324d,#234b69);
+      padding:20px;
+      text-align:center;
+      font-weight:800;
+      font-size:22px;
+      box-shadow:0 5px 22px #0005;
+    }
+
+    .sub{
+      font-size:12px;
+      font-weight:500;
+      color:#c9d9e5;
+      margin-top:7px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+    }
+
+    main{
+      width:min(820px,94%);
+      margin:20px auto;
+      flex:1;
+    }
+
+    .camera-wrap{
+      position:relative;
+      width:100%;
+      overflow:hidden;
+      border-radius:16px;
+      background:#050b11;
+      border:1px solid #2a4051;
+      box-shadow:0 12px 32px #0005;
+    }
+
+    #video{
+      width:100%;
+      display:block;
+      height:auto;
+      min-height:300px;
+      max-height:75vh;
+      object-fit:cover;
+      background:#050b11;
+    }
+
+    .scanner-frame{
+      position:absolute;
+      left:7%;
+      right:7%;
+      top:32%;
+      height:36%;
+      border:3px solid var(--accent);
+      border-radius:12px;
+      box-shadow:
+        0 0 0 9999px rgba(0,0,0,.30),
+        0 0 25px rgba(120,178,214,.45);
+      pointer-events:none;
+    }
+
+    .scanner-line{
+      position:absolute;
+      left:8%;
+      right:8%;
+      top:50%;
+      height:2px;
+      background:var(--accent);
+      box-shadow:0 0 10px var(--accent);
+      animation:scanline 1.8s ease-in-out infinite;
+      pointer-events:none;
+    }
+
+    @keyframes scanline{
+      0%,100%{
+        transform:translateY(-70px);
+      }
+
+      50%{
+        transform:translateY(70px);
+      }
+    }
+
+    .status{
+      margin-top:14px;
+      padding:14px;
+      border-radius:11px;
+      background:#0b1621;
+      border:1px solid #2a3e50;
+      text-align:center;
+      color:#c8d7e2;
+      font-size:14px;
+    }
+
+    .status.ok{
+      background:#173c32;
+      border-color:#2d765d;
+      color:#bff0d8;
+    }
+
+    .status.error{
+      background:#43252c;
+      border-color:#8c4652;
+      color:#ffc5cb;
+    }
+
+    .code{
+      margin-top:14px;
+      padding:15px;
+      border-radius:11px;
+      background:#0b1621;
+      border:1px solid #2a3e50;
+      text-align:center;
+      font-size:20px;
+      font-weight:800;
+      word-break:break-all;
+    }
+
+    .buttons{
+      display:flex;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    button{
+      flex:1;
+      border:0;
+      border-radius:11px;
+      padding:15px;
+      font-weight:800;
+      font-size:15px;
+      cursor:pointer;
+    }
+
+    #btnStart{
+      background:var(--accent);
+      color:#071019;
+    }
+
+    #btnStop{
+      background:#354b5d;
+      color:white;
+    }
+
+    button:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+    }
+
+    .help{
+      margin-top:15px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+      line-height:1.5;
+    }
+
+    footer{
+      padding:14px;
+      text-align:center;
+      color:#8298aa;
+      font-size:11px;
+      border-top:1px solid #223746;
+      background:#09131d;
+    }
+
+    @media(max-width:600px){
+
+      header{
+        font-size:18px;
+        padding:17px;
+      }
+
+      main{
+        width:94%;
+        margin:14px auto;
+      }
+
+      #video{
+        min-height:300px;
+        max-height:70vh;
+      }
+
+      .buttons{
+        flex-direction:column;
+      }
+    }
+  </style>
+
+  <script src="https://unpkg.com/@zxing/browser@latest"></script>
+</head>
+
+<body>
+
+<header>
+  SCANNER SSCC
+  <div class="sub">Code 128 / GS1-128</div>
+</header>
+
+<main>
+
+  <div class="camera-wrap">
+
+    <video
+      id="video"
+      autoplay
+      muted
+      playsinline
+      webkit-playsinline>
+    </video>
+
+    <div class="scanner-frame"></div>
+    <div class="scanner-line"></div>
+
+  </div>
+
+  <div id="status" class="status">
+    Câmara desligada
+  </div>
+
+  <div
+    id="code"
+    class="code"
+    style="display:none">
+  </div>
+
+  <div class="buttons">
+
+    <button
+      id="btnStart"
+      onclick="iniciarScanner()">
+      Iniciar câmara
+    </button>
+
+    <button
+      id="btnStop"
+      onclick="pararScanner()"
+      disabled>
+      Parar
+    </button>
+
+  </div>
+
+  <div class="help">
+    Aponte a câmara para o código SSCC e mantenha-o dentro da zona de leitura.
+    <br>
+    A leitura é contínua e termina automaticamente quando o código for encontrado.
+  </div>
+
+</main>
+
+<footer>
+  SSCC - CONTROLO DE RECEÇÃO CFL . SFW
+</footer>
+
+
+<script>
+
+const video =
+  document.getElementById('video');
+
+const statusBox =
+  document.getElementById('status');
+
+const codeBox =
+  document.getElementById('code');
+
+const btnStart =
+  document.getElementById('btnStart');
+
+const btnStop =
+  document.getElementById('btnStop');
+
+
+let reader = null;
+let stream = null;
+let scannerAtivo = false;
+let codigoEncontrado = false;
+
+
+/* =====================================================
+ * OBTER URL DE RETORNO
+ * ===================================================== */
+
+function obterReturnUrl(){
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  return (
+    params.get('return') ||
+    ''
+  );
+}
+
+
+/* =====================================================
+ * NORMALIZAR URL
+ * ===================================================== */
+
+function prepararReturnUrl(codigo){
+
+  const returnUrl =
+    obterReturnUrl();
+
+  if(!returnUrl){
+    return null;
+  }
+
+  try{
+
+    const url =
+      new URL(returnUrl);
+
+    /*
+     * O SSCC é devolvido através do parâmetro sscc.
+     */
+
+    url.searchParams.set(
+      'sscc',
+      codigo
+    );
+
+    return url.toString();
+
+  }catch(e){
+
+    console.error(
+      'URL de retorno inválido:',
+      e
+    );
+
+    return null;
+  }
+}
+
+
+/* =====================================================
+ * INICIAR SCANNER
+ * ===================================================== */
+
+async function iniciarScanner(){
+
+  if(scannerAtivo){
+    return;
+  }
+
+  try{
+
+    codigoEncontrado =
+      false;
+
+    codeBox.style.display =
+      'none';
+
+    codeBox.textContent =
+      '';
+
+    btnStart.disabled =
+      true;
+
+    btnStop.disabled =
+      false;
+
+    statusBox.className =
+      'status';
+
+    statusBox.textContent =
+      'A pedir acesso à câmara...';
+
+
+    /* -------------------------------------------------
+     * VERIFICAÇÕES
+     * ------------------------------------------------- */
+
+    if(!window.isSecureContext){
+
+      throw new Error(
+        'A câmara requer uma página HTTPS.'
+      );
+    }
+
+
+    if(
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia
+    ){
+
+      throw new Error(
+        'Este navegador não suporta acesso à câmara.'
+      );
+    }
+
+
+    if(
+      !window.ZXingBrowser ||
+      !window.ZXingBrowser.BrowserMultiFormatReader
+    ){
+
+      throw new Error(
+        'O leitor de códigos não foi carregado. Verifique a ligação à Internet.'
+      );
+    }
+
+
+    /* -------------------------------------------------
+     * PEDIR CÂMARA
+     *
+     * Como esta página é independente e de topo,
+     * getUserMedia() pode pedir a autorização normal.
+     * ------------------------------------------------- */
+
+    stream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video:{
+          facingMode:{
+            ideal:'environment'
+          },
+
+          width:{
+            ideal:1920
+          },
+
+          height:{
+            ideal:1080
+          },
+
+          frameRate:{
+            ideal:30
+          }
+        },
+
+        audio:false
+
+      });
+
+
+    /* -------------------------------------------------
+     * VIDEO
+     * ------------------------------------------------- */
+
+    video.srcObject =
+      stream;
+
+    video.muted =
+      true;
+
+    video.setAttribute(
+      'playsinline',
+      ''
+    );
+
+    video.setAttribute(
+      'webkit-playsinline',
+      ''
+    );
+
+    await video.play();
+
+
+    scannerAtivo =
+      true;
+
+
+    statusBox.textContent =
+      'Câmara ativa — procure o SSCC...';
+
+
+    /* -------------------------------------------------
+     * ZXING
+     * ------------------------------------------------- */
+
+    reader =
+      new ZXingBrowser.BrowserMultiFormatReader();
+
+
+    reader.decodeFromVideoElement(
+      video,
+
+      (result,error) => {
+
+        if(
+          !scannerAtivo ||
+          codigoEncontrado
+        ){
+          return;
+        }
+
+
+        /*
+         * Os erros normais enquanto procura
+         * um código são ignorados.
+         */
+
+        if(error){
+          return;
+        }
+
+
+        if(!result){
+          return;
+        }
+
+
+        let codigo =
+          '';
+
+        try{
+
+          codigo =
+            String(
+              result.getText() || ''
+            ).trim();
+
+        }catch(e){
+
+          return;
+        }
+
+
+        if(!codigo){
+          return;
+        }
+
+
+        /* -------------------------------------------------
+         * VALIDAR MINIMAMENTE COMO SSCC
+         * ------------------------------------------------- */
+
+        codigo =
+          codigo.replace(
+            /\s+/g,
+            ''
+          );
+
+
+        if(!/^\d+$/.test(codigo)){
+
+          statusBox.textContent =
+            'Código encontrado, mas não é numérico. Continue a procurar...';
+
+          return;
+        }
+
+
+        if(codigo.length < 22){
+
+          statusBox.textContent =
+            'Código demasiado curto. Continue a procurar...';
+
+          return;
+        }
+
+
+        /* -------------------------------------------------
+         * SSCC ENCONTRADO
+         * ------------------------------------------------- */
+
+        codigoEncontrado =
+          true;
+
+        statusBox.className =
+          'status ok';
+
+        statusBox.textContent =
+          'SSCC encontrado — a enviar...';
+
+        codeBox.style.display =
+          'block';
+
+        codeBox.textContent =
+          codigo;
+
+
+        pararScanner();
+
+
+        /* -------------------------------------------------
+         * DEVOLVER AO SISTEMA
+         * ------------------------------------------------- */
+
+        const returnUrl =
+          prepararReturnUrl(codigo);
+
+
+        if(returnUrl){
+
+          /*
+           * Pequeno atraso para o utilizador ver
+           * que o código foi encontrado.
+           */
+
+          setTimeout(
+            () => {
+
+              window.location.href =
+                returnUrl;
+
+            },
+            250
+          );
+
+          return;
+        }
+
+
+        /*
+         * Se não houver URL de retorno,
+         * mantemos o código visível.
+         */
+
+        statusBox.textContent =
+          'SSCC encontrado.';
+
+      }
+    );
+
+
+  }catch(e){
+
+    console.error(
+      'Erro ao iniciar scanner:',
+      e
+    );
+
+
+    scannerAtivo =
+      false;
+
+
+    if(stream){
+
+      stream
+        .getTracks()
+        .forEach(
+          track => {
+
+            try{
+              track.stop();
+            }catch(_){}
+          }
+        );
+
+      stream =
+        null;
+    }
+
+
+    video.srcObject =
+      null;
+
+
+    btnStart.disabled =
+      false;
+
+    btnStop.disabled =
+      true;
+
+
+    statusBox.className =
+      'status error';
+
+
+    let mensagem =
+      'Não foi possível iniciar a câmara.';
+
+
+    if(e){
+
+      switch(e.name){
+
+        case 'NotAllowedError':
+
+          mensagem =
+            'O acesso à câmara foi recusado. Autorize a câmara para este site no Chrome.';
+
+          break;
+
+
+        case 'NotFoundError':
+
+          mensagem =
+            'Não foi encontrada nenhuma câmara.';
+
+          break;
+
+
+        case 'NotReadableError':
+
+          mensagem =
+            'A câmara está a ser utilizada por outra aplicação.';
+
+          break;
+
+
+        case 'OverconstrainedError':
+
+          mensagem =
+            'As definições solicitadas não são suportadas por esta câmara.';
+
+          break;
+
+
+        case 'SecurityError':
+
+          mensagem =
+            'O navegador bloqueou o acesso à câmara por motivos de segurança.';
+
+          break;
+
+
+        default:
+
+          if(e.message){
+            mensagem =
+              e.message;
+          }
+      }
+    }
+
+
+    statusBox.textContent =
+      mensagem;
+  }
+}
+
+
+/* =====================================================
+ * PARAR
+ * ===================================================== */
+
+function pararScanner(){
+
+  scannerAtivo =
+    false;
+
+
+  try{
+
+    if(reader){
+
+      if(
+        typeof reader.reset ===
+        'function'
+      ){
+
+        reader.reset();
+      }
+    }
+
+  }catch(e){
+
+    console.warn(e);
+  }
+
+
+  reader =
+    null;
+
+
+  if(stream){
+
+    stream
+      .getTracks()
+      .forEach(
+        track => {
+
+          try{
+            track.stop();
+          }catch(_){}
+        }
+      );
+
+    stream =
+      null;
+  }
+
+
+  try{
+    video.pause();
+  }catch(_){}
+
+
+  video.srcObject =
+    null;
+
+
+  btnStart.disabled =
+    false;
+
+  btnStop.disabled =
+    true;
+
+
+  if(!codigoEncontrado){
+
+    statusBox.className =
+      'status';
+
+    statusBox.textContent =
+      'Câmara desligada';
+  }
+}
+
+
+window.addEventListener(
+  'beforeunload',
+  pararScanner
+);
+
+</script>
+
+</body>
+</html>
