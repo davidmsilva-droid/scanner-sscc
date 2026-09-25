@@ -1,118 +1,104 @@
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scanner SSCC</title>
-  <script src="https://unpkg.com/@zxing/browser@latest"></script>
-  <style>
-    body{font-family:Arial,sans-serif;background:#f3f4f6;margin:0;padding:20px;color:#1f2937;text-align:center}
-    .card{max-width:560px;margin:auto;background:white;border-radius:16px;padding:20px;box-shadow:0 4px 18px #0001}
-    video{width:100%;max-height:420px;background:#111;border-radius:12px;object-fit:cover}
-    button{border:0;border-radius:10px;padding:12px 18px;margin:6px;font-size:16px;cursor:pointer}
-    #status{margin:14px 0;font-weight:bold;white-space:pre-wrap}
-    .ok{color:#15803d}.error{color:#b91c1c}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scanner SSCC</title>
+<script src="https://unpkg.com/@zxing/browser@latest"></script>
+<style>
+body{font-family:Arial,sans-serif;background:#111827;color:#fff;margin:0;padding:16px;text-align:center}
+.card{max-width:680px;margin:auto;background:#1f2937;border-radius:16px;padding:18px;box-shadow:0 4px 18px #0006}
+video{width:100%;max-height:480px;background:#000;border-radius:12px;object-fit:cover}
+button{border:0;border-radius:10px;padding:12px 16px;margin:5px;font-size:16px;cursor:pointer}
+#status{margin:14px 0;font-weight:bold;white-space:pre-wrap}.ok{color:#86efac}.error{color:#fca5a5}.hint{font-size:13px;color:#d1d5db;line-height:1.5}
+.scanbox{position:relative}.scanbox:after{content:'';position:absolute;left:8%;right:8%;top:44%;border-top:2px solid #22d3ee;box-shadow:0 0 8px #22d3ee;pointer-events:none}
+#preview{display:none}
+</style>
 </head>
 <body>
-  <div class="card">
-    <h2>Leitura de SSCC</h2>
-    <video id="video" autoplay muted playsinline></video>
-    <div id="status">A iniciar a câmara...</div>
-    <button id="btnStop" type="button">Parar câmara</button>
-  </div>
-
+<div class="card">
+  <h2>Leitura de SSCC</h2>
+  <div class="scanbox"><video id="video" autoplay muted playsinline></video></div>
+  <canvas id="preview"></canvas>
+  <div id="status">A iniciar a câmara...</div>
+  <div class="hint">Para etiquetas verdes, azuis ou com reflexos: incline ligeiramente o telemóvel, evite o brilho direto e mantenha o código inteiro dentro da imagem. O sistema tenta várias versões da imagem automaticamente.</div>
+  <button id="btnTorch" type="button">Luz</button>
+  <button id="btnProcess" type="button">Tentar leitura reforçada</button>
+  <button id="btnStop" type="button">Parar câmara</button>
+</div>
 <script>
-  let reader = null;
-  let controls = null;
-  let enviado = false;
-
-  const video = document.getElementById('video');
-  const statusEl = document.getElementById('status');
-
-  function status(text, cls='') {
-    statusEl.textContent = text;
-    statusEl.className = cls;
+let reader=null,controls=null,enviado=false,track=null,torch=false,loopAtivo=false,processando=false;
+const video=document.getElementById('video');
+const canvas=document.getElementById('preview');
+const ctx=canvas.getContext('2d',{willReadFrequently:true});
+const statusEl=document.getElementById('status');
+function status(t,c=''){statusEl.textContent=t;statusEl.className=c}
+function normalizar(c){return String(c||'').replace(/\s+/g,'').trim()}
+function valido(c){return /^\d{22,}$/.test(c)}
+function devolverSSCC(codigo){
+  if(enviado)return;
+  codigo=normalizar(codigo);
+  if(!valido(codigo)){status('Código lido, mas não parece ser um SSCC válido.','error');return}
+  enviado=true;parar();
+  if(window.opener&&!window.opener.closed){
+    try{
+      window.opener.postMessage({type:'SSCC_SCAN_RESULT',sscc:codigo},'*');
+      status('SSCC enviado para a aplicação. Pode regressar à janela anterior.','ok');
+      setTimeout(()=>window.close(),900);return;
+    }catch(e){console.error(e)}
   }
-
-  function normalizar(codigo) {
-    return String(codigo || '').replace(/\s+/g, '').trim();
+  const ret=new URLSearchParams(location.search).get('return');
+  if(ret){try{const u=new URL(ret);u.searchParams.set('sscc',codigo);location.assign(u.toString());return}catch(e){console.error(e)}}
+  status('Não foi possível contactar a aplicação. SSCC: '+codigo,'error');
+  const i=document.createElement('input');i.value=codigo;i.readOnly=true;i.style.cssText='width:90%;padding:12px;font-size:18px;margin-top:12px';document.querySelector('.card').appendChild(i);
+}
+function parar(){loopAtivo=false;if(controls){try{controls.stop()}catch(e){}}}
+function varianteImagem(mode){
+  const w=video.videoWidth||1280,h=video.videoHeight||720;
+  if(!w||!h)return false;
+  canvas.width=w;canvas.height=h;ctx.drawImage(video,0,0,w,h);
+  if(mode==='original')return true;
+  const img=ctx.getImageData(0,0,w,h),d=img.data;
+  for(let i=0;i<d.length;i+=4){
+    const r=d[i],g=d[i+1],b=d[i+2];
+    let y=0.299*r+0.587*g+0.114*b;
+    if(mode==='gray'){}
+    if(mode==='contrast')y=Math.max(0,Math.min(255,(y-128)*1.8+128));
+    if(mode==='threshold')y=y>145?255:0;
+    if(mode==='invert')y=255-y;
+    d[i]=d[i+1]=d[i+2]=y;
   }
-
-  function devolverSSCC(codigo) {
-    if (enviado) return;
-    codigo = normalizar(codigo);
-
-    if (!codigo || !/^\d{22,}$/.test(codigo)) {
-      status('Código lido, mas não parece ser um SSCC válido.', 'error');
-      return;
-    }
-
-    enviado = true;
-    if (controls) controls.stop();
-
-    // Método principal: enviar o SSCC para a janela que abriu este scanner.
-    if (window.opener && !window.opener.closed) {
-      try {
-        window.opener.postMessage({
-          type: 'SSCC_SCAN_RESULT',
-          sscc: codigo
-        }, '*');
-
-        status('SSCC enviado para a aplicação. Pode regressar à janela anterior.', 'ok');
-        setTimeout(() => window.close(), 900);
-        return;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    // Fallback: regressar através do parâmetro sscc na URL.
-    const returnUrl = new URLSearchParams(window.location.search).get('return');
-    if (returnUrl) {
-      try {
-        const url = new URL(returnUrl);
-        url.searchParams.set('sscc', codigo);
-        window.location.assign(url.toString());
-        return;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    // Último recurso: mostrar o código para cópia manual.
-    status('Não foi possível contactar a aplicação de origem. SSCC: ' + codigo, 'error');
-    const input = document.createElement('input');
-    input.value = codigo;
-    input.readOnly = true;
-    input.style.cssText = 'width:90%;padding:12px;font-size:18px;margin-top:12px';
-    document.querySelector('.card').appendChild(input);
+  ctx.putImageData(img,0,0);return true;
+}
+function tentarVariantes(){
+  if(enviado||processando||!reader||!video.videoWidth)return;
+  processando=true;
+  const modos=['original','gray','contrast','threshold','invert'];
+  for(const modo of modos){
+    if(!varianteImagem(modo))continue;
+    try{
+      const result=reader.decodeFromCanvas(canvas);
+      if(result&&result.getText){devolverSSCC(result.getText());break}
+    }catch(e){}
   }
-
-  async function iniciar() {
-    try {
-      status('A solicitar acesso à câmara...');
-      reader = new ZXingBrowser.BrowserMultiFormatReader();
-      const devices = await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
-      const deviceId = devices.length ? devices[devices.length - 1].deviceId : undefined;
-
-      controls = await reader.decodeFromVideoDevice(deviceId, video, (result, error) => {
-        if (result) devolverSSCC(result.getText());
-      });
-
-      status('Câmara ativa. Aponte para o código SSCC.');
-    } catch (e) {
-      console.error(e);
-      status('Não foi possível iniciar a câmara. Verifique as permissões do navegador.', 'error');
-    }
-  }
-
-  document.getElementById('btnStop').addEventListener('click', () => {
-    if (controls) controls.stop();
-    status('Câmara parada.');
-  });
-
-  iniciar();
+  processando=false;
+}
+function ciclo(){if(!loopAtivo||enviado)return;tentarVariantes();setTimeout(ciclo,450)}
+async function iniciar(){
+  try{
+    status('A solicitar acesso à câmara...');
+    reader=new ZXingBrowser.BrowserMultiFormatReader();
+    const devices=await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
+    const deviceId=devices.length?devices[devices.length-1].deviceId:undefined;
+    controls=await reader.decodeFromVideoDevice(deviceId,video,()=>{});
+    track=video.srcObject&&video.srcObject.getVideoTracks()[0];
+    loopAtivo=true;status('Câmara ativa. Aponte para o código SSCC.');ciclo();
+  }catch(e){console.error(e);status('Não foi possível iniciar a câmara. Verifique as permissões.','error')}
+}
+document.getElementById('btnProcess').onclick=()=>{tentarVariantes()};
+document.getElementById('btnTorch').onclick=async()=>{try{if(!track)return;const caps=track.getCapabilities?track.getCapabilities():{};if(!caps.torch){status('A luz não é suportada por este telemóvel.');return}torch=!torch;await track.applyConstraints({advanced:[{torch}]});status(torch?'Luz ligada.':'Luz desligada.')}catch(e){status('Não foi possível alterar a luz.')}};
+document.getElementById('btnStop').onclick=()=>{parar();status('Câmara parada.')};
+iniciar();
 </script>
 </body>
 </html>
