@@ -33,12 +33,22 @@ const canvas=document.getElementById('preview');
 const ctx=canvas.getContext('2d',{willReadFrequently:true});
 const statusEl=document.getElementById('status');
 function status(t,c=''){statusEl.textContent=t;statusEl.className=c}
-function normalizar(c){return String(c||'').replace(/\s+/g,'').trim()}
-function valido(c){return /^\d{22,}$/.test(c)}
+function normalizar(c){
+  return String(c||'')
+    .replace(/\u001d/g,'')
+    .replace(/\s+/g,'')
+    .trim();
+}
+function apenasDigitos(c){return String(c||'').replace(/[^0-9]/g,'')}
+function valido(c){return /^\d{1,}$/.test(c)}
 function devolverSSCC(codigo){
   if(enviado)return;
-  codigo=normalizar(codigo);
-  if(!valido(codigo)){status('Código lido, mas não parece ser um SSCC válido.','error');return}
+  codigo=apenasDigitos(normalizar(codigo));
+  if(!valido(codigo)){
+    status('A leitura não contém números válidos. Tente novamente.','error');
+    return;
+  }
+  status('Código detetado: '+codigo+'\nA enviar para validação da aplicação...');
   enviado=true;parar();
   if(window.opener&&!window.opener.closed){
     try{
